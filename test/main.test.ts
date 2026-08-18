@@ -992,7 +992,7 @@ test("showConfigHints shows [both] badge when contextValue is both", () => {
   assert.match(out, /\[both\]/, "context hint [both] should appear for both mode");
 });
 
-test("showConfigHints defaults to false and is not set in defaultConfig", () => {
+test("showConfigHints defaults to false in defaultConfig", () => {
   const cfg = defaultConfig();
   assert.equal(cfg.showConfigHints, false);
 });

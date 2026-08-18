@@ -565,7 +565,8 @@ ${line2}`;
 }
 function renderSingleLine(payload, config, width, modelSegment, ctxPct, quota, stateLabel) {
   const coloredBadge = colorize(modelSegment, colorBlue, config.color);
-  let ctx = `Ctx ${contextValue(config, payload.context_window, ctxPct)}`;
+  const ctxBase = `Ctx ${contextValue(config, payload.context_window, ctxPct)}`;
+  let ctx = ctxBase;
   if (config.showConfigHints) {
     ctx += ` ${configHintBadge(contextHintText(config), config)}`;
   }
@@ -591,9 +592,9 @@ function renderSingleLine(payload, config, width, modelSegment, ctxPct, quota, s
   const levels = [
     [coloredBadge, ctx, tokens, bar, usage2, stateText],
     [coloredBadge, ctx, bar, usage2, stateText],
-    [coloredBadge, ctx, usage2, stateText],
-    [coloredBadge, ctx, stateText],
-    [ctx, stateText],
+    [coloredBadge, ctxBase, usage2, stateText],
+    [coloredBadge, ctxBase, stateText],
+    [ctxBase, stateText],
     [`${formatInt(ctxPct)}%`, stateLabel]
   ];
   for (const parts of levels) {
@@ -807,7 +808,8 @@ function contextPercent(ctx) {
 }
 function usageLabel(config, quota, withBar) {
   if (quota.windows.length > 1) {
-    return `Usage ${quota.windows.map((window) => usageWindowLabel(config, window, withBar)).join(" |  ")}`;
+    const hint2 = config.showConfigHints ? ` ${configHintBadge(usageHintText(config), config)}` : "";
+    return `Usage ${quota.windows.map((window) => usageWindowLabel(config, window, withBar)).join(" |  ")}` + hint2;
   }
   let label = "Usage ";
   if (withBar && config.showProgressBar) {

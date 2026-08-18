@@ -1065,3 +1065,38 @@ test("statusline renders refreshed quota on the same idle transition", async () 
     else process.env.AGY_HUD_QUOTA_CACHE = oldCacheEnv;
   }
 });
+
+
+test("showConfigHints appends usage badge in multi-window quota display", () => {
+  const payload = JSON.stringify({
+    cwd: "agy-hud",
+    model: { display_name: "Gemini 3.5 Flash (Medium)" },
+    context_window: { used_percentage: 25 },
+    agent_state: "idle",
+    plan_tier: "Google AI Pro",
+    terminal_width: 160,
+    quota: {
+      "gemini-5h": { remaining_fraction: 0.6, reset_time: "2026-08-18T12:00:00Z" },
+      "gemini-weekly": { remaining_fraction: 0.8, reset_time: "2026-08-25T00:00:00Z" }
+    }
+  });
+  const cfg = { ...defaultConfig(), showConfigHints: true, color: false };
+  const out = strip(renderStatusline(payload, cfg, null));
+  assert.match(out, /\[left\]/, "usage hint [left] should appear in multi-window display");
+});
+
+test("showConfigHints narrow-width degradation drops hint badge", () => {
+  const payload = JSON.stringify({
+    cwd: "agy-hud",
+    model: { display_name: "Gemini 3.5 Flash (Medium)" },
+    context_window: { used_percentage: 25 },
+    agent_state: "idle",
+    plan_tier: "Google AI Pro",
+    terminal_width: 12,
+    quota: { "gemini-5h": { remaining_fraction: 0.6, reset_time: "2026-08-18T12:00:00Z" } }
+  });
+  const cfg = { ...defaultConfig(), showConfigHints: true, multiline: false, color: false };
+  const out = strip(renderStatusline(payload, cfg, null));
+  assert.doesNotMatch(out, /\[left\]/, "usage hint should not appear at narrow width");
+  assert.doesNotMatch(out, /\[%\]/, "context hint should not appear at narrow width");
+});

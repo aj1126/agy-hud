@@ -23,7 +23,7 @@ test("default config matches open-source defaults", () => {
 test("load merges partial overrides", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agy-hud-"));
   const configPath = path.join(dir, "config.json");
-  fs.writeFileSync(configPath, `{"color":false,"multiline":false,"debug":true,"show_agent_state":false,"show_icons":false,"context_value":"both","usage_value":"percent"}`);
+  fs.writeFileSync(configPath, `{"color":false,"multiline":false,"debug":true,"show_agent_state":false,"show_icons":false,"context_value":"both","usage_value":"percent","show_config_hints":true}`);
 
   const got = loadFromPaths([configPath]);
 
@@ -34,6 +34,7 @@ test("load merges partial overrides", () => {
   assert.equal(got.showIcons, false);
   assert.equal(got.contextValue, "both");
   assert.equal(got.usageValue, "percent");
+  assert.equal(got.showConfigHints, true);
   assert.equal(got.showModel, true);
   assert.equal(got.showProgressBar, true);
   assert.equal(got.showGitBranch, true);

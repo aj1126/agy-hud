@@ -176,7 +176,8 @@ function renderMultiline(payload: Payload, config: Config, width: number, modelS
 
 function renderSingleLine(payload: Payload, config: Config, width: number, modelSegment: string, ctxPct: number, quota: QuotaDisplay, stateLabel: string): string {
   const coloredBadge = colorize(modelSegment, colorBlue, config.color);
-  let ctx = `Ctx ${contextValue(config, payload.context_window, ctxPct)}`;
+  const ctxBase = `Ctx ${contextValue(config, payload.context_window, ctxPct)}`;
+  let ctx = ctxBase;
   if (config.showConfigHints) {
     ctx += ` ${configHintBadge(contextHintText(config), config)}`;
   }
@@ -202,9 +203,9 @@ function renderSingleLine(payload: Payload, config: Config, width: number, model
   const levels = [
     [coloredBadge, ctx, tokens, bar, usage, stateText],
     [coloredBadge, ctx, bar, usage, stateText],
-    [coloredBadge, ctx, usage, stateText],
-    [coloredBadge, ctx, stateText],
-    [ctx, stateText],
+    [coloredBadge, ctxBase, usage, stateText],
+    [coloredBadge, ctxBase, stateText],
+    [ctxBase, stateText],
     [`${formatInt(ctxPct)}%`, stateLabel]
   ];
   for (const parts of levels) {
@@ -439,7 +440,8 @@ function contextPercent(ctx: Payload["context_window"]): number {
 
 function usageLabel(config: Config, quota: QuotaDisplay, withBar: boolean): string {
   if (quota.windows.length > 1) {
-    return `Usage ${quota.windows.map(window => usageWindowLabel(config, window, withBar)).join(" |  ")}`;
+    const hint = config.showConfigHints ? ` ${configHintBadge(usageHintText(config), config)}` : "";
+    return `Usage ${quota.windows.map(window => usageWindowLabel(config, window, withBar)).join(" |  ")}` + hint;
   }
   let label = "Usage ";
   if (withBar && config.showProgressBar) {

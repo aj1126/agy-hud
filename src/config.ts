@@ -11,6 +11,7 @@ export interface Config {
   showIcons: boolean;
   contextValue: string;
   usageValue: string;
+  showConfigHints: boolean;
   debug: boolean;
 }
 
@@ -26,6 +27,7 @@ export function defaultConfig(): Config {
     showIcons: true,
     contextValue: "percent",
     usageValue: "remaining",
+    showConfigHints: false,
     debug: false
   };
 }
@@ -58,6 +60,7 @@ function merge(base: Config, patch: Record<string, unknown>): Config {
   if (typeof patch.show_icons === "boolean") base.showIcons = patch.show_icons;
   if (typeof patch.context_value === "string" && patch.context_value !== "") base.contextValue = patch.context_value;
   if (typeof patch.usage_value === "string" && patch.usage_value !== "") base.usageValue = patch.usage_value;
+  if (typeof patch.show_config_hints === "boolean") base.showConfigHints = patch.show_config_hints;
   if (typeof patch.debug === "boolean") base.debug = patch.debug;
   return base;
 }

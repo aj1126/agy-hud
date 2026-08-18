@@ -917,6 +917,86 @@ test("statusline refreshes when conversation settles after active work even with
   }
 });
 
+test("showConfigHints appends context and usage mode badges", () => {
+  const payload = JSON.stringify({
+    cwd: "agy-hud",
+    model: { display_name: "Gemini 3.5 Flash (Medium)" },
+    context_window: { used_percentage: 25 },
+    agent_state: "idle",
+    plan_tier: "Google AI Pro",
+    terminal_width: 120,
+    quota: { "gemini-5h": { remaining_fraction: 0.6, reset_time: "2026-08-18T12:00:00Z" } }
+  });
+  const cfg = { ...defaultConfig(), showConfigHints: true, color: false };
+  const out = strip(renderStatusline(payload, cfg, null));
+  assert.match(out, /\[%\]/, "context hint [%] should appear");
+  assert.match(out, /\[left\]/, "usage hint [left] should appear");
+});
+
+test("showConfigHints false suppresses mode badges", () => {
+  const payload = JSON.stringify({
+    cwd: "agy-hud",
+    model: { display_name: "Gemini 3.5 Flash (Medium)" },
+    context_window: { used_percentage: 25 },
+    agent_state: "idle",
+    plan_tier: "Google AI Pro",
+    terminal_width: 120,
+    quota: { "gemini-5h": { remaining_fraction: 0.6, reset_time: "2026-08-18T12:00:00Z" } }
+  });
+  const cfg = { ...defaultConfig(), showConfigHints: false, color: false };
+  const out = strip(renderStatusline(payload, cfg, null));
+  assert.doesNotMatch(out, /\[%\]/, "context hint should not appear when disabled");
+  assert.doesNotMatch(out, /\[left\]/, "usage hint should not appear when disabled");
+});
+
+test("showConfigHints shows [used] badge when usageValue is percent", () => {
+  const payload = JSON.stringify({
+    cwd: "agy-hud",
+    model: { display_name: "Gemini 3.5 Flash (Medium)" },
+    context_window: { used_percentage: 25 },
+    agent_state: "idle",
+    plan_tier: "Google AI Pro",
+    terminal_width: 120,
+    quota: { "gemini-5h": { remaining_fraction: 0.6, reset_time: "2026-08-18T12:00:00Z" } }
+  });
+  const cfg = { ...defaultConfig(), showConfigHints: true, usageValue: "percent", color: false };
+  const out = strip(renderStatusline(payload, cfg, null));
+  assert.match(out, /\[used\]/, "usage hint [used] should appear for percent mode");
+});
+
+test("showConfigHints shows [tok] badge when contextValue is tokens", () => {
+  const payload = JSON.stringify({
+    cwd: "agy-hud",
+    model: { display_name: "Gemini 3.5 Flash (Medium)" },
+    context_window: { total_input_tokens: 50000, context_window_size: 1048576, used_percentage: 5 },
+    agent_state: "idle",
+    plan_tier: "Google AI Pro",
+    terminal_width: 160
+  });
+  const cfg = { ...defaultConfig(), showConfigHints: true, contextValue: "tokens", color: false };
+  const out = strip(renderStatusline(payload, cfg, null));
+  assert.match(out, /\[tok\]/, "context hint [tok] should appear for tokens mode");
+});
+
+test("showConfigHints shows [both] badge when contextValue is both", () => {
+  const payload = JSON.stringify({
+    cwd: "agy-hud",
+    model: { display_name: "Gemini 3.5 Flash (Medium)" },
+    context_window: { total_input_tokens: 50000, context_window_size: 1048576, used_percentage: 5 },
+    agent_state: "idle",
+    plan_tier: "Google AI Pro",
+    terminal_width: 160
+  });
+  const cfg = { ...defaultConfig(), showConfigHints: true, contextValue: "both", color: false };
+  const out = strip(renderStatusline(payload, cfg, null));
+  assert.match(out, /\[both\]/, "context hint [both] should appear for both mode");
+});
+
+test("showConfigHints defaults to false and is not set in defaultConfig", () => {
+  const cfg = defaultConfig();
+  assert.equal(cfg.showConfigHints, false);
+});
+
 test("statusline renders refreshed quota on the same idle transition", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agy-hud-"));
   const cachePath = path.join(dir, "quota_cache.json");

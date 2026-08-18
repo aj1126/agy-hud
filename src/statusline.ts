@@ -128,6 +128,9 @@ function renderMultiline(payload: Payload, config: Config, width: number, modelS
     ctx += `${progressBar(ctxPct, 10, config.color)} `;
   }
   ctx += contextValue(config, payload.context_window, ctxPct);
+  if (config.showConfigHints) {
+    ctx += ` ${configHintBadge(contextHintText(config), config)}`;
+  }
 
   let usage = "";
   if (quota.hasQuota) {
@@ -173,7 +176,10 @@ function renderMultiline(payload: Payload, config: Config, width: number, modelS
 
 function renderSingleLine(payload: Payload, config: Config, width: number, modelSegment: string, ctxPct: number, quota: QuotaDisplay, stateLabel: string): string {
   const coloredBadge = colorize(modelSegment, colorBlue, config.color);
-  const ctx = `Ctx ${contextValue(config, payload.context_window, ctxPct)}`;
+  let ctx = `Ctx ${contextValue(config, payload.context_window, ctxPct)}`;
+  if (config.showConfigHints) {
+    ctx += ` ${configHintBadge(contextHintText(config), config)}`;
+  }
   let tokens = tokenDetail(payload.context_window);
   if (tokens !== "" && config.contextValue === "percent") {
     tokens = colorize(tokens, colorMuted, config.color);
@@ -439,7 +445,24 @@ function usageLabel(config: Config, quota: QuotaDisplay, withBar: boolean): stri
   if (withBar && config.showProgressBar) {
     label += `${usageBar(config, quota.usagePct)} `;
   }
-  return label + usageValue(config, quota.usagePct);
+  const hint = config.showConfigHints ? ` ${configHintBadge(usageHintText(config), config)}` : "";
+  return label + usageValue(config, quota.usagePct) + hint;
+}
+
+function usageHintText(config: Config): string {
+  return config.usageValue === "remaining" ? "left" : "used";
+}
+
+function contextHintText(config: Config): string {
+  switch (config.contextValue) {
+    case "tokens": return "tok";
+    case "both": return "both";
+    default: return "%";
+  }
+}
+
+function configHintBadge(text: string, config: Config): string {
+  return colorize(`[${text}]`, colorMuted, config.color);
 }
 
 function usageWindowLabel(config: Config, window: QuotaWindowDisplay, withBar: boolean): string {

@@ -59,6 +59,7 @@ function defaultConfig() {
     showIcons: true,
     contextValue: "percent",
     usageValue: "remaining",
+    showConfigHints: false,
     debug: false
   };
 }
@@ -89,6 +90,7 @@ function merge(base, patch) {
   if (typeof patch.show_icons === "boolean") base.showIcons = patch.show_icons;
   if (typeof patch.context_value === "string" && patch.context_value !== "") base.contextValue = patch.context_value;
   if (typeof patch.usage_value === "string" && patch.usage_value !== "") base.usageValue = patch.usage_value;
+  if (typeof patch.show_config_hints === "boolean") base.showConfigHints = patch.show_config_hints;
   if (typeof patch.debug === "boolean") base.debug = patch.debug;
   return base;
 }
@@ -516,6 +518,9 @@ function renderMultiline(payload, config, width, modelSegment, ctxPct, quota, br
     ctx += `${progressBar(ctxPct, 10, config.color)} `;
   }
   ctx += contextValue(config, payload.context_window, ctxPct);
+  if (config.showConfigHints) {
+    ctx += ` ${configHintBadge(contextHintText(config), config)}`;
+  }
   let usage2 = "";
   if (quota.hasQuota) {
     usage2 = usageLabel(config, quota, true);
@@ -560,7 +565,10 @@ ${line2}`;
 }
 function renderSingleLine(payload, config, width, modelSegment, ctxPct, quota, stateLabel) {
   const coloredBadge = colorize(modelSegment, colorBlue, config.color);
-  const ctx = `Ctx ${contextValue(config, payload.context_window, ctxPct)}`;
+  let ctx = `Ctx ${contextValue(config, payload.context_window, ctxPct)}`;
+  if (config.showConfigHints) {
+    ctx += ` ${configHintBadge(contextHintText(config), config)}`;
+  }
   let tokens = tokenDetail(payload.context_window);
   if (tokens !== "" && config.contextValue === "percent") {
     tokens = colorize(tokens, colorMuted, config.color);
@@ -805,7 +813,24 @@ function usageLabel(config, quota, withBar) {
   if (withBar && config.showProgressBar) {
     label += `${usageBar(config, quota.usagePct)} `;
   }
-  return label + usageValue(config, quota.usagePct);
+  const hint = config.showConfigHints ? ` ${configHintBadge(usageHintText(config), config)}` : "";
+  return label + usageValue(config, quota.usagePct) + hint;
+}
+function usageHintText(config) {
+  return config.usageValue === "remaining" ? "left" : "used";
+}
+function contextHintText(config) {
+  switch (config.contextValue) {
+    case "tokens":
+      return "tok";
+    case "both":
+      return "both";
+    default:
+      return "%";
+  }
+}
+function configHintBadge(text, config) {
+  return colorize(`[${text}]`, colorMuted, config.color);
 }
 function usageWindowLabel(config, window, withBar) {
   let label = "";

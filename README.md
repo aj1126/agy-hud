@@ -181,7 +181,8 @@ Default config:
   "show_agent_state": true,
   "show_icons": true,
   "context_value": "percent",
-  "usage_value": "remaining"
+  "usage_value": "remaining",
+  "show_config_hints": false
 }
 ```
 
@@ -194,6 +195,7 @@ Display options:
 - `show_icons`: shows Nerd Font icons. Set to `false` to fall back to plain text if your terminal font renders boxes.
 - `context_value`: `percent`, `tokens`, or `both`. Default is `percent`, so context shows current input-side window occupancy. When token totals are available, the percentage and bar are derived from `total_input_tokens / context_window_size` so a large latest response does not make the HUD jump.
 - `usage_value`: `remaining` or `percent`. Default is `remaining`, so quota text and bar show what is left. When Antigravity provides both windows, the HUD shows them separately with per-window reset durations, for example `Usage ████████░░ 82% (↻ 1h 52m) |  █░░░░░░░░░ 13% (↻ 4d 21h)`.
+- `show_config_hints`: when `true`, appends small mode badges to the Context and Usage segments — for example `[%]`, `[tok]`, or `[both]` after the context value, and `[left]` or `[used]` after the quota value — so you can see which display modes are active at a glance. Defaults to `false`.
 
 ## Quota Cache
 

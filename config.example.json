@@ -9,5 +9,6 @@
   "show_agent_state": true,
   "show_icons": true,
   "context_value": "percent",
-  "usage_value": "remaining"
+  "usage_value": "remaining",
+  "show_config_hints": false
 }
